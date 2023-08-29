@@ -1,0 +1,24 @@
+# general
+thread_small := 4
+thread_large := 10
+maxjob := 20
+queue  := all.q,fast.q,centos7
+slots  := 2
+submit := node
+
+## parameters
+# snp_tree_bootnum: bootstrap number
+# snp_tree_model: tree model, can be pdist, jc, k2p, f81, f84, tn93
+# snp_tree_bootfrac: bootstrap 
+snp_tree_bootnum   := 100
+snp_tree_model     := pdist
+snp_tree_bootfrac  := 1
+
+## software
+perl         := /Bio/bin/perl
+parafly      := /Bio/User/kxie/software/mambaforge/envs/parafly/bin/ParaFly
+rscript      := /Bio/User/kxie/software/mambaforge/envs/R/bin/Rscript
+plink        := /Bio/User/kxie/software/mambaforge/envs/plink2/bin/plink2
+goalign      := /Bio/User/kxie/software/mambaforge/envs/goalign/bin/goalign
+gotree       := /Bio/User/kxie/software/mambaforge/envs/goalign/bin/gotree
+fastme       := /Bio/User/kxie/software/mambaforge/envs/fastme/bin/fastme
