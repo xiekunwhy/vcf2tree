@@ -9,7 +9,7 @@ submit := node
 ## parameters
 # snp_tree_bootnum: bootstrap number
 # snp_tree_model: tree model, can be pdist, jc, k2p, f81, f84, tn93
-# snp_tree_bootfrac: bootstrap 
+# snp_tree_bootfrac: bootstrap fraction, > 0 <= 1
 snp_tree_bootnum   := 100
 snp_tree_model     := pdist
 snp_tree_bootfrac  := 1
