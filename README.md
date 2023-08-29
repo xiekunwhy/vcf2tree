@@ -1,5 +1,5 @@
 # vcf2tree
-construction NJ-tree from vcf file
+construct NJ-tree from vcf file
 
 # Dependences
 perl https://www.perl.org
