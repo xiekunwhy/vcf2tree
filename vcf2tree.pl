@@ -99,7 +99,7 @@ $config{gotree} ||= "/Bio/User/kxie/software/mambaforge/envs/goalign/bin/gotree"
 $config{fastme} ||= "/Bio/User/kxie/software/mambaforge/envs/fastme/bin/fastme";
 $config{maxjob} ||= 20;
 $config{queue} ||= "all.q,fast.q,centos7";
-$config{submit} ||= "qsub";
+$config{submit} ||= "node";
 
 
 &main();
@@ -176,7 +176,7 @@ sub distance()
 	print SH1 "$cmd\n";
 	$cmd = "$config{fastme} -i $outdir/$key.orig.dist -o $outdir/$key\.orig.tree";
 	print SH2 "$cmd\n";
-	for (my $i = 0; $i <= $config{snp_tree_bootnum}; $i++) {
+	for (my $i = 1; $i <= $config{snp_tree_bootnum}; $i++) {
 		$i = sprintf("%04d", $i);
 		$cmd = "$config{goalign} build distboot -i $phy -p -t 4 -m $config{snp_tree_model} ";
 		$cmd .= "-f $config{snp_tree_bootfrac} -o $tmpdir/$key.boot$i.dist";
