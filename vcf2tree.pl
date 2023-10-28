@@ -13,42 +13,41 @@ my ($config_file, $pattern);
 my $run;
 GetOptions(
 	"h|?"=>\&help,
-	"v:s"=>\$invcf,
-	"p:s"=>\$inphy,
-	"o:s"=>\$outdir,
-	"k:s"=>\$key,
-	"s:s"=>\$shdir,
-	"b:s"=>\$bootnum,
-	"f:s"=>\$fraction,
-	"m:s"=>\$model,
-	"c:s"=>\$config_file,
-	"p:s"=>\$pattern,
-	"r:s"=>\$run,
+	"vcf:s"=>\$invcf,
+	"phy:s"=>\$inphy,
+	"outdir:s"=>\$outdir,
+	"key:s"=>\$key,
+	"shdir:s"=>\$shdir,
+	"bootnum:s"=>\$bootnum,
+	"bootfrac:s"=>\$fraction,
+	"model:s"=>\$model,
+	"config:s"=>\$config_file,
+	"pattern:s"=>\$pattern,
+	"run:s"=>\$run,
 ) || &help;
 &help unless (($invcf || $inphy) && $outdir && $key);
-
 sub help
 {
 	print"
 	Description: vcf to NJ-tree by pre-computed distance matrix and parallelizing bootstraps
 
-	-v  <file>  input vcf file                 [force if no -p]
-	-p  <file>  input phylip file              [force if no -v]
-	-o  <dir>   output directory               [force]
-	-k  <str>   output prefix                  [force]
-	-s  <dir>   shell directory                [-o]
-	-b  <int>   bootstrap times                [100]
-	-f  <float> fraction of bootstrap sampling [0.25]
-	-m  <str>   substitution model             [pdist]
-                pdist: p-distance
-                jc   : Juke-Cantor
-                k2p  : Kimura 2 Parameters
-                f81  : Felsenstein 81
-                f84  : Felsenstein 84
-                tn93 : Tamura and Nei 1993
-	-c  <file>  config file                    [optional]
-	-p  <str>   config split pattern           [:=]
-	-r  <T/F>   run or not                     [T]
+	-vcf        <file>  input vcf file                 [force if no -phy]
+	-phy        <file>  input phylip file              [force if no -vcf]
+	-outdir     <dir>   output directory               [force]
+	-key        <str>   output prefix                  [force]
+	-shdir      <dir>   shell directory                [-o]
+	-bootnum    <int>   bootstrap times                [100]
+	-bootfrac   <float> fraction of bootstrap sampling [0.25]
+	-model      <str>   substitution model             [pdist]
+                             pdist: p-distance
+                             jc   : Juke-Cantor
+                             k2p  : Kimura 2 Parameters
+                             f81  : Felsenstein 81
+                             f84  : Felsenstein 84
+                             tn93 : Tamura and Nei 1993
+	-config     <file>  config file                    [optional]
+	-pattern    <str>   config split pattern           [:=]
+	-run        <T/F>   run or not                     [T]
 	-h          Help document
 ";
 	exit;
@@ -85,7 +84,7 @@ $run ||= "T";
 $pattern ||= ":=";
 ##### read config
 my %config;
-&read_config($config_file);
+&read_config($config_file) if defined $config_file;
 
 $config{snp_tree_bootnum} //= 100;
 $config{snp_tree_model} ||= "pdist";
@@ -99,7 +98,7 @@ $config{gotree} ||= "/Bio/User/kxie/software/mambaforge/envs/goalign/bin/gotree"
 $config{fastme} ||= "/Bio/User/kxie/software/mambaforge/envs/fastme/bin/fastme";
 $config{maxjob} ||= 20;
 $config{queue} ||= "all.q,fast.q,centos7";
-$config{submit} ||= "node";
+$config{submit} ||= "qsub";
 
 
 &main();
@@ -118,10 +117,10 @@ sub main()
 	my ($cmd, $phyfile);
 	if(defined $invcf && !defined $inphy){
 		($cmd, $phyfile) = &filter($invcf);
+		print PIPE "$cmd\n";
 	}else{
 		$phyfile = $inphy;
 	}
-	print PIPE "$cmd\n";
 
 	# distance
 	my ($cmd1, $cmd2) = &distance($phyfile);
@@ -176,7 +175,7 @@ sub distance()
 	print SH1 "$cmd\n";
 	$cmd = "$config{fastme} -i $outdir/$key.orig.dist -o $outdir/$key\.orig.tree";
 	print SH2 "$cmd\n";
-	for (my $i = 1; $i <= $config{snp_tree_bootnum}; $i++) {
+	for (my $i = 0; $i <= $config{snp_tree_bootnum}; $i++) {
 		$i = sprintf("%04d", $i);
 		$cmd = "$config{goalign} build distboot -i $phy -p -t 4 -m $config{snp_tree_model} ";
 		$cmd .= "-f $config{snp_tree_bootfrac} -o $tmpdir/$key.boot$i.dist";
